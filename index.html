@@ -40,70 +40,87 @@ tr:first-child .rank{background:#fff0c2;color:#805600}.xpval{font-weight:750;fon
   .stat strong{font-size:21px}
 }
 
-/* Fonte retrô de videogames antigos */
-h1, h2, h3, .rank, .xpval, .stat strong {
-  font-family: 'Press Start 2P', monospace;
-}
-
-h1 {
-  font-size: clamp(14px, 2.5vw, 22px);
-  line-height: 1.8;
-}
-
-h2, h3 {
-  font-size: 12px;
-  line-height: 1.8;
-}
-
-.rank {
-  font-size: 10px;
-}
-
-.xpval, .stat strong {
-  font-size: 12px;
-}
-
-/* FONTE RETRÔ */
+/* FORÇAR A FONTE RETRÔ EM TODO O SITE */
+html,
 body,
-body * {
-  font-family: 'Press Start 2P', monospace !important;
+body *,
+body *::before,
+body *::after,
+input,
+button,
+select,
+textarea,
+option {
+  font-family: "Press Start 2P", monospace !important;
 }
 
-/* Ajustar o tamanho para não ficar ilegível */
+/* Tamanho geral: a fonte pixelada ocupa mais espaço */
 body {
-  font-size: 10px;
-  line-height: 1.8;
+  font-size: 9px !important;
+  line-height: 1.8 !important;
 }
 
+/* Títulos */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Press Start 2P", monospace !important;
+  line-height: 1.8 !important;
+}
+
+/* Textos de tabelas e classificação */
+table,
+thead,
+tbody,
+tr,
+th,
+td,
+.rank,
+.xpval,
+.namebtn {
+  font-family: "Press Start 2P", monospace !important;
+  font-size: 8px !important;
+  line-height: 1.8 !important;
+}
+
+/* Campos e botões */
+button,
+input,
+select,
+textarea {
+  font-family: "Press Start 2P", monospace !important;
+  font-size: 8px !important;
+}
+
+/* Estatísticas e perfil */
+.stat,
+.stat *,
+.panel,
+.panel * {
+  font-family: "Press Start 2P", monospace !important;
+}
+
+/* Evitar títulos grandes demais em telas pequenas */
 h1 {
-  font-size: 18px;
-  line-height: 1.8;
+  font-size: 16px !important;
 }
 
 h2 {
-  font-size: 13px;
-  line-height: 1.8;
+  font-size: 12px !important;
 }
 
-button,
-input,
-select {
-  font-size: 10px;
-}
+@media (max-width: 780px) {
+  body {
+    font-size: 8px !important;
+  }
 
-@media (max-width: 600px) {
   h1 {
-    font-size: 13px;
+    font-size: 12px !important;
   }
 
   h2 {
-    font-size: 11px;
-  }
-
-  body {
-    font-size: 9px;
+    font-size: 10px !important;
   }
 }
+
 </style>
 </head>
 <body>
