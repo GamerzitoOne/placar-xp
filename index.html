@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leaderboard XP — Turma</title>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#657089;--line:#e4e8f0;--accent:#375dfb;--danger:#b42318}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+header{background:#182342;color:white;padding:28px 18px}header .wrap,main{max-width:1100px;margin:auto}
+header p{margin:6px 0 0;color:#cbd4f4}h1{font-size:clamp(24px,4vw,36px);margin:0}
+main{padding:22px 16px 50px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+.stat,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 3px 12px #17203308}
+.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:25px}
+.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,1fr);gap:16px}
+.panel h2{font-size:19px;margin:0 0 12px}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+input,select,button,textarea{font:inherit;border-radius:9px;border:1px solid var(--line);padding:9px 11px}
+input,select,textarea{background:white;color:var(--ink)}input[type=search]{flex:1;min-width:150px}
+button{cursor:pointer;background:#fff}button.primary{background:var(--accent);color:white;border-color:var(--accent)}button.danger{color:var(--danger)}button.small{padding:5px 8px;font-size:12px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}th{font-size:12px;text-transform:uppercase;color:var(--muted)}td.xp,th.xp{text-align:right;white-space:nowrap}
+.namebtn{border:0;padding:0;text-align:left;background:transparent;color:var(--accent);font-weight:650}.rank{display:inline-grid;place-items:center;width:27px;height:27px;border-radius:9px;background:#eef1f8;font-weight:700;font-size:12px}
+tr:first-child .rank{background:#fff0c2;color:#805600}.xpval{font-weight:750;font-variant-numeric:tabular-nums}
+.profile-empty{color:var(--muted);padding:16px 0}.avatar{width:54px;height:54px;border-radius:16px;background:#e9edff;color:#304ed0;display:grid;place-items:center;font-size:22px;font-weight:800}
+.profile-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.profile-head h3{margin:0;font-size:18px}.profile-head p{margin:3px 0;color:var(--muted);font-size:13px}
+.xp-editor{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.xp-editor input{width:100px}.note{font-size:12px;color:var(--muted);margin-top:14px}
+.authbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.status{font-size:13px;color:var(--muted)}.hidden{display:none!important}
+.loginbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.loginbox input{max-width:220px}.error{color:var(--danger);font-size:13px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>🏆 XP da Turma</h1><p>Ranking público e perfis individuais dos estudantes</p></div></header>
+<main>
+  <section class="panel" style="margin-bottom:16px">
+    <div class="authbar">
+      <strong id="authTitle">Modo visitante — somente leitura</strong>
+      <span class="status" id="authStatus">Conectando ao banco de dados…</span>
+      <span style="flex:1"></span>
+      <button id="showLogin">Entrar como administrador</button>
+      <button id="logout" class="hidden">Sair</button>
+    </div>
+    <form id="loginForm" class="loginbox hidden">
+      <input id="email" type="email" placeholder="E-mail do administrador" autocomplete="username" required>
+      <input id="password" type="password" placeholder="Senha" autocomplete="current-password" required>
+      <button class="primary" type="submit">Entrar</button>
+      <button type="button" id="cancelLogin">Cancelar</button>
+      <div id="loginError" class="error"></div>
+    </form>
+  </section>
+  <section class="stats">
+    <div class="stat"><span>Estudantes</span><strong id="totalAlunos">0</strong></div>
+    <div class="stat"><span>XP distribuído</span><strong id="xpTotal">0</strong></div>
+    <div class="stat"><span>Líder atual</span><strong id="lider" style="font-size:17px">—</strong></div>
+  </section>
+  <div class="layout">
+    <section class="panel">
+      <h2>🏅 Classificação</h2>
+      <div class="tools">
+        <input id="busca" type="search" placeholder="Buscar estudante...">
+        <select id="ordem" aria-label="Ordenar classificação">
+          <option value="xp">Maior XP</option><option value="nome">Nome A–Z</option>
+        </select>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Estudante</th><th class="xp">XP</th><th>Perfil</th></tr></thead><tbody id="corpo"></tbody></table></div>
+      <p class="note">Todos podem consultar o ranking. Somente a conta de administrador autenticada pode alterar XP e anotações.</p>
+    </section>
+    <aside class="panel" id="perfil"><h2>👤 Perfil individual</h2><p class="profile-empty">Selecione um estudante na classificação para abrir o perfil.</p></aside>
+  </div>
+  <p class="note">O ranking é compartilhado entre visitantes por meio do Firebase Firestore. Configure as credenciais e as regras de segurança antes de publicar.</p>
+</main>
+
+<!-- Firebase SDK compat -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+// 1) Substitua pelos dados do seu projeto Firebase (Configurações do projeto > Seus apps > Aplicativo da Web).
+const firebaseConfig = {
+  apiKey: "AIzaSyDdKh3bnLk3w_kiCdumgVfXpSlCejn0spo",
+  authDomain: "relintuit-edd8f.firebaseapp.com",
+  projectId: "relintuit-edd8f",
+  appId: "1:891307442774:web:ba0bfc8af1c37d968871f7"
+};
+
+const nomes = [
+'Alisson Douglas Pereira Santos','Allan Gabriel de Souza Albuquerque',
+'Ana Caroline Rodrigues de Oliveira','Bianca Calixto Ferreira',
+'Carlos Emanoel Pereira Silva','Carolina Pereira da Costa',
+'DANIEL ABNER FARIAS SIMPLICIO','Dayane Isidório da Silva',
+'Eduarda Laari Oundê Fernandes da Silva','Eloysa Farias Barbosa',
+'FILIPE GONÇALO ALCANTARA SOUZA','Franciele Prazeres de Oliveira Mendes',
+'Iasmyn Gizely Barbosa Alves','ISAAC BEZERRA DA SILVA',
+'Jeanderson Batista Pessoa','Jhonatas Ferraz da Silva',
+'Júlio Gabriel Claudino Ferreira','Kaik da Silva Nunes',
+'Lucas Emanoel Xavier Paulino','Maria Cecília da Costa Pontes',
+'Maria Clara Oliveira Guedes','Mariana Oliveira de Souza',
+'Miguel Costa Fernandes Silva','Pedro Lucas Silva Leite',
+'Renan Pedro Ferreira Gomes','Silmara Gonçalves Batista',
+'Vinícius Batista de Souza Araújo'
+];
+
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n||0).toLocaleString('pt-BR');
+const escapar = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let auth=null, db=null, usuario=null, dados=[], selecionado=null, unsubscribe=null, inicializado=false;
+
+function mostrarStatus(msg){$('authStatus').textContent=msg;}
+function ehConfigExemplo(){
+ return !firebaseConfig.apiKey || firebaseConfig.apiKey.includes('COLOQUE_') ||
+        !firebaseConfig.projectId || firebaseConfig.projectId==='SEU-PROJETO';
+}
+function iniciarFirebase(){
+ if(ehConfigExemplo()){
+   mostrarStatus('Falta configurar o Firebase. Veja o README incluído no pacote.');
+   $('authTitle').textContent='Site ainda não configurado';
+   $('showLogin').disabled=true;
+   return;
+ }
+ try{
+   firebase.initializeApp(firebaseConfig);
+   auth=firebase.auth(); db=firebase.firestore();
+   auth.onAuthStateChanged(async user=>{
+     usuario=user;
+     atualizarModo();
+     if(user){
+       mostrarStatus('Autenticado: '+user.email);
+     }else{
+       mostrarStatus('Visitante: somente leitura');
+     }
+     await carregarDados();
+   });
+ }catch(e){mostrarStatus('Erro ao iniciar Firebase: '+e.message);}
+}
+function atualizarModo(){
+ const admin=!!usuario;
+ $('authTitle').textContent=admin?'Administrador autenticado':'Modo visitante — somente leitura';
+ $('showLogin').classList.toggle('hidden',admin);
+ $('logout').classList.toggle('hidden',!admin);
+ if(selecionado)renderPerfil();
+}
+async function carregarDados(){
+ if(!db)return;
+ try{
+   const snap=await db.collection('students').get();
+   const porNome=new Map(snap.docs.map(d=>[d.id,d.data()]));
+   // Cria documentos iniciais apenas quando autenticado e com permissão de escrita.
+   if(snap.empty && usuario){
+     for(let i=0;i<nomes.length;i++){
+       await db.collection('students').doc('student_'+String(i+1).padStart(2,'0'))
+         .set({name:nomes[i],xp:0,bio:'',updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+     }
+     const novo=await db.collection('students').get();
+     dados=novo.docs.map(d=>({id:d.id,...d.data()}));
+   }else{
+     dados=nomes.map((nome,i)=>{
+       const doc=[...porNome.entries()].find(([id,x])=>x.name===nome);
+       return doc?{id:doc[0],...doc[1]}:{id:'student_'+String(i+1).padStart(2,'0'),name:nome,xp:0,bio:'',notSaved:true};
+     });
+   }
+   inicializado=true;render();
+   if(unsubscribe)unsubscribe();
+   unsubscribe=db.collection('students').onSnapshot(s=>{
+     const map=new Map(s.docs.map(d=>[d.data().name,{id:d.id,...d.data()}]));
+     dados=nomes.map((name,i)=>map.get(name)||{id:'student_'+String(i+1).padStart(2,'0'),name,xp:0,bio:'',notSaved:true});
+     render();
+   },err=>mostrarStatus('Erro ao atualizar dados: '+err.message));
+ }catch(e){
+   mostrarStatus('Falha ao ler o ranking. Confira a configuração e as regras do Firestore.');
+   console.error(e);
+ }
+}
+function ranking(){
+ const termo=$('busca').value.trim().toLocaleLowerCase('pt-BR');
+ const arr=dados.filter(a=>a.name.toLocaleLowerCase('pt-BR').includes(termo));
+ arr.sort($('ordem').value==='nome'?(a,b)=>a.name.localeCompare(b.name,'pt-BR'):(a,b)=>b.xp-a.xp||a.name.localeCompare(b.name,'pt-BR'));
+ return arr;
+}
+function render(){
+ const ordenados=[...dados].sort((a,b)=>b.xp-a.xp||a.name.localeCompare(b.name,'pt-BR'));
+ $('totalAlunos').textContent=dados.length;
+ $('xpTotal').textContent=fmt(dados.reduce((s,a)=>s+Number(a.xp||0),0));
+ $('lider').textContent=ordenados[0]?.xp>0?ordenados[0].name.split(' ')[0]:'—';
+ $('corpo').innerHTML=ranking().map(a=>{
+   const pos=ordenados.findIndex(x=>x.name===a.name)+1;
+   return `<tr><td><span class="rank">${pos}</span></td><td><button class="namebtn" data-open="${escapar(a.name)}">${escapar(a.name)}</button></td><td class="xp"><span class="xpval">${fmt(a.xp)} XP</span></td><td><button class="small" data-open="${escapar(a.name)}">Abrir</button></td></tr>`;
+ }).join('')||'<tr><td colspan="4">Nenhum estudante encontrado.</td></tr>';
+ $('corpo').querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>abrir(b.dataset.open)));
+ if(selecionado)renderPerfil();
+}
+function abrir(nome){selecionado=nome;renderPerfil();$('perfil').scrollIntoView({behavior:'smooth',block:'nearest'});}
+function renderPerfil(){
+ const a=dados.find(x=>x.name===selecionado);if(!a)return;
+ const admin=!!usuario, iniciais=a.name.split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+ $('perfil').innerHTML=`<h2>👤 Perfil individual</h2>
+ <div class="profile-head"><div class="avatar">${escapar(iniciais)}</div><div><h3>${escapar(a.name)}</h3><p>Posição no ranking: ${[...dados].sort((x,y)=>y.xp-x.xp).findIndex(x=>x.name===a.name)+1}º lugar</p></div></div>
+ <div class="stat" style="padding:12px"><span>XP atual</span><strong>${fmt(a.xp)} XP</strong></div>
+ <h3 style="font-size:15px;margin-bottom:5px">Anotações</h3>
+ <p>${a.bio?escapar(a.bio):'<span class="status">Nenhuma anotação.</span>'}</p>
+ ${admin?`<h3 style="font-size:15px;margin-bottom:5px">Administrar XP</h3>
+ <div class="xp-editor"><input id="valorXP" type="number" min="1" step="1" value="10" aria-label="Quantidade de XP"><button class="primary" id="addXP">+ Adicionar</button><button id="tirarXP">− Retirar</button></div>
+ <button class="danger" id="zerarXP">Zerar XP</button>
+ <h3 style="font-size:15px;margin:16px 0 5px">Editar anotação</h3><textarea id="bio" rows="3" placeholder="Conquistas, observações ou metas..." style="width:100%;resize:vertical">${escapar(a.bio||'')}</textarea><button id="salvarBio" style="margin-top:7px">Salvar anotação</button>`
+ :'<p class="note">Somente o administrador autenticado pode modificar XP ou anotações.</p>'}`;
+ if(!admin)return;
+ $('addXP').onclick=()=>mudarXP(a,1);
+ $('tirarXP').onclick=()=>mudarXP(a,-1);
+ $('zerarXP').onclick=async()=>{if(confirm('Zerar o XP de '+a.name+'?'))await atualizarAluno(a,{xp:0});};
+ $('salvarBio').onclick=async()=>{await atualizarAluno(a,{bio:$('bio').value});};
+}
+async function atualizarAluno(a,patch){
+ if(!usuario){alert('Entre como administrador para alterar dados.');return;}
+ try{
+   await db.collection('students').doc(a.id).set({...patch,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true});
+ }catch(e){alert('Não foi possível salvar. Verifique as regras do Firestore.\n'+e.message);}
+}
+async function mudarXP(a,mult){
+ const valor=Number($('valorXP').value);
+ if(!Number.isInteger(valor)||valor<=0){alert('Digite um número inteiro positivo.');return;}
+ await atualizarAluno(a,{xp:Math.max(0,Number(a.xp||0)+valor*mult)});
+}
+$('showLogin').onclick=()=>{$('loginForm').classList.remove('hidden');$('email').focus();};
+$('cancelLogin').onclick=()=>{$('loginForm').classList.add('hidden');$('loginError').textContent='';};
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('loginError').textContent='';
+ if(!auth){$('loginError').textContent='Configure o Firebase primeiro.';return;}
+ try{
+   await auth.signInWithEmailAndPassword($('email').value.trim(),$('password').value);
+   $('password').value='';$('loginForm').classList.add('hidden');
+ }catch(err){$('loginError').textContent='Login não realizado. Confira e-mail e senha.';}
+});
+$('logout').onclick=()=>auth?.signOut();
+$('busca').addEventListener('input',render);$('ordem').addEventListener('change',render);
+iniciarFirebase();
+</script>
+</body>
+</html>
