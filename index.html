@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard XP — Turma</title>
 <style>
-:root{--bg:#f4f6fb;--card:#fff;--ink:#172033;--muted:#657089;--line:#e4e8f0;--accent:#375dfb;--danger:#b42318}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
-header{background:#182342;color:white;padding:28px 18px}header .wrap,main{max-width:1100px;margin:auto}
+:root{--bg:#111827;--card:rgba(255,255,255,.94);--ink:#172033;--muted:#657089;--line:#e4e8f0;--accent:#375dfb;--danger:#b42318}
+*{box-sizing:border-box}html{min-height:100%;background:#111827}body{margin:0;min-height:100vh;background:transparent;color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;position:relative}
+body::before{content:"";position:fixed;inset:0;z-index:-2;background-image:url("https://i.imgur.com/jEvEqba.gif");background-position:center;background-size:cover;background-repeat:no-repeat;transform:translateZ(0)}
+body::after{content:"";position:fixed;inset:0;z-index:-1;background:rgba(10,16,32,.42);pointer-events:none}
+header{background:rgba(18,29,57,.82);backdrop-filter:blur(8px);color:white;padding:28px 18px}header .wrap,main{max-width:1100px;margin:auto}
 header p{margin:6px 0 0;color:#cbd4f4}h1{font-size:clamp(24px,4vw,36px);margin:0}
 main{padding:22px 16px 50px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
-.stat,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 3px 12px #17203308}
+.stat,.panel{background:var(--card);border:1px solid rgba(255,255,255,.55);border-radius:16px;padding:16px;box-shadow:0 6px 24px rgba(0,0,0,.12);backdrop-filter:blur(8px)}
 .stat span{display:block;color:var(--muted);font-size:12px}.stat strong{font-size:25px}
 .layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,1fr);gap:16px}
 .panel h2{font-size:19px;margin:0 0 12px}.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
@@ -23,7 +25,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 tr:first-child .rank{background:#fff0c2;color:#805600}.xpval{font-weight:750;font-variant-numeric:tabular-nums}
 .profile-empty{color:var(--muted);padding:16px 0}.avatar{width:54px;height:54px;border-radius:16px;background:#e9edff;color:#304ed0;display:grid;place-items:center;font-size:22px;font-weight:800}
 .profile-head{display:flex;gap:12px;align-items:center;margin-bottom:14px}.profile-head h3{margin:0;font-size:18px}.profile-head p{margin:3px 0;color:var(--muted);font-size:13px}
-.xp-editor{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.xp-editor input{width:100px}.note{font-size:12px;color:var(--muted);margin-top:14px}
+.xp-editor{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.xp-editor input{width:100px}.note{font-size:12px;color:var(--muted);margin-top:14px}.xp-icon{width:19px;height:19px;object-fit:contain;vertical-align:-4px;margin-right:4px}.xp-label{white-space:nowrap}.xpval{display:inline-flex;align-items:center;justify-content:flex-end;gap:3px}
 .authbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.status{font-size:13px;color:var(--muted)}.hidden{display:none!important}
 .loginbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.loginbox input{max-width:220px}.error{color:var(--danger);font-size:13px}
 @media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}}
@@ -50,7 +52,7 @@ tr:first-child .rank{background:#fff0c2;color:#805600}.xpval{font-weight:750;fon
   </section>
   <section class="stats">
     <div class="stat"><span>Estudantes</span><strong id="totalAlunos">0</strong></div>
-    <div class="stat"><span>XP distribuído</span><strong id="xpTotal">0</strong></div>
+    <div class="stat"><span>XP distribuído</span><strong id="xpTotal"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">0</strong></div>
     <div class="stat"><span>Líder atual</span><strong id="lider" style="font-size:17px">—</strong></div>
   </section>
   <div class="layout">
@@ -62,7 +64,7 @@ tr:first-child .rank{background:#fff0c2;color:#805600}.xpval{font-weight:750;fon
           <option value="xp">Maior XP</option><option value="nome">Nome A–Z</option>
         </select>
       </div>
-      <div class="table-wrap"><table><thead><tr><th>#</th><th>Estudante</th><th class="xp">XP</th><th>Perfil</th></tr></thead><tbody id="corpo"></tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>#</th><th>Estudante</th><th class="xp"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">XP</th><th>Perfil</th></tr></thead><tbody id="corpo"></tbody></table></div>
       <p class="note">Todos podem consultar o ranking. Somente a conta de administrador autenticada pode alterar XP e anotações.</p>
     </section>
     <aside class="panel" id="perfil"><h2>👤 Perfil individual</h2><p class="profile-empty">Selecione um estudante na classificação para abrir o perfil.</p></aside>
@@ -179,11 +181,11 @@ function ranking(){
 function render(){
  const ordenados=[...dados].sort((a,b)=>b.xp-a.xp||a.name.localeCompare(b.name,'pt-BR'));
  $('totalAlunos').textContent=dados.length;
- $('xpTotal').textContent=fmt(dados.reduce((s,a)=>s+Number(a.xp||0),0));
+ $('xpTotal').innerHTML='<img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">'+fmt(dados.reduce((s,a)=>s+Number(a.xp||0),0));
  $('lider').textContent=ordenados[0]?.xp>0?ordenados[0].name.split(' ')[0]:'—';
  $('corpo').innerHTML=ranking().map(a=>{
    const pos=ordenados.findIndex(x=>x.name===a.name)+1;
-   return `<tr><td><span class="rank">${pos}</span></td><td><button class="namebtn" data-open="${escapar(a.name)}">${escapar(a.name)}</button></td><td class="xp"><span class="xpval">${fmt(a.xp)} XP</span></td><td><button class="small" data-open="${escapar(a.name)}">Abrir</button></td></tr>`;
+   return `<tr><td><span class="rank">${pos}</span></td><td><button class="namebtn" data-open="${escapar(a.name)}">${escapar(a.name)}</button></td><td class="xp"><span class="xpval"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="">${fmt(a.xp)} XP</span></td><td><button class="small" data-open="${escapar(a.name)}">Abrir</button></td></tr>`;
  }).join('')||'<tr><td colspan="4">Nenhum estudante encontrado.</td></tr>';
  $('corpo').querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>abrir(b.dataset.open)));
  if(selecionado)renderPerfil();
@@ -194,7 +196,7 @@ function renderPerfil(){
  const admin=!!usuario, iniciais=a.name.split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase();
  $('perfil').innerHTML=`<h2>👤 Perfil individual</h2>
  <div class="profile-head"><div class="avatar">${escapar(iniciais)}</div><div><h3>${escapar(a.name)}</h3><p>Posição no ranking: ${[...dados].sort((x,y)=>y.xp-x.xp).findIndex(x=>x.name===a.name)+1}º lugar</p></div></div>
- <div class="stat" style="padding:12px"><span>XP atual</span><strong>${fmt(a.xp)} XP</strong></div>
+ <div class="stat" style="padding:12px"><span>XP atual</span><strong><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">${fmt(a.xp)} XP</strong></div>
  <h3 style="font-size:15px;margin-bottom:5px">Anotações</h3>
  <p>${a.bio?escapar(a.bio):'<span class="status">Nenhuma anotação.</span>'}</p>
  ${admin?`<h3 style="font-size:15px;margin-bottom:5px">Administrar XP</h3>
