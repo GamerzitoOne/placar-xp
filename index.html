@@ -1,10 +1,14 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Leaderboard XP — Turma</title>
 <style>
+  
 :root{--bg:#111827;--card:rgba(255,255,255,.94);--ink:#172033;--muted:#657089;--line:#e4e8f0;--accent:#375dfb;--danger:#b42318}
 *{box-sizing:border-box}html{min-height:100%;background:#111827}body{margin:0;min-height:100vh;background:transparent;color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;position:relative}
 body::before{content:"";position:fixed;inset:0;z-index:-2;background-image:url("https://i.imgur.com/jEvEqba.gif");background-position:center;background-size:cover;background-repeat:no-repeat;transform:translateZ(0)}
@@ -28,7 +32,35 @@ tr:first-child .rank{background:#fff0c2;color:#805600}.xpval{font-weight:750;fon
 .xp-editor{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.xp-editor input{width:100px}.note{font-size:12px;color:var(--muted);margin-top:14px}.xp-icon{width:19px;height:19px;object-fit:contain;vertical-align:-4px;margin-right:4px}.xp-label{white-space:nowrap}.xpval{display:inline-flex;align-items:center;justify-content:flex-end;gap:3px}
 .authbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.status{font-size:13px;color:var(--muted)}.hidden{display:none!important}
 .loginbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.loginbox input{max-width:220px}.error{color:var(--danger);font-size:13px}
-@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:21px}}
+@media(max-width:780px){
+  .layout{grid-template-columns:1fr}
+  .stats{gap:8px}
+  .stat{padding:12px}
+  .stat strong{font-size:21px}
+}
+
+/* Fonte retrô de videogames antigos */
+h1, h2, h3, .rank, .xpval, .stat strong {
+  font-family: 'Press Start 2P', monospace;
+}
+
+h1 {
+  font-size: clamp(14px, 2.5vw, 22px);
+  line-height: 1.8;
+}
+
+h2, h3 {
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.rank {
+  font-size: 10px;
+}
+
+.xpval, .stat strong {
+  font-size: 12px;
+}
 </style>
 </head>
 <body>
