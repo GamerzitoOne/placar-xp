@@ -143,24 +143,26 @@ h2 {
 
 <main>
   
-  <section id="aba-trabalhos" class="panel hidden">
+  
+<section id="aba-trabalhos" class="panel hidden" style="display:none">
   <h2>Trabalhos</h2>
   <h3>Mito e cosmologia</h3>
 
   <p>Material da aula — página 1</p>
   <img
-    src="./trabalho-mito-cosmologia-1.png"
+    src="./material-mito-cosmologia-1.png"
     alt="Material sobre mito e cosmologia — página 1"
-    style="display:block; width:100%; max-width:100%; height:auto; object-fit:contain;"
+    style="display:block; width:100%; height:auto; margin-bottom:20px;"
   >
 
   <p>Atividade — página 2</p>
   <img
-    src="./trabalho-mito-cosmologia-2.png"
+    src="./material-mito-cosmologia-2.png"
     alt="Atividade sobre mito e cosmologia — página 2"
-    style="display:block; width:100%; max-width:100%; height:auto; object-fit:contain;"
+    style="display:block; width:100%; height:auto;"
   >
 </section>
+
   <div id="aba-ranking">
     <section class="panel" style="margin-bottom:16px">
       <div class="authbar">
@@ -207,15 +209,18 @@ h2 {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
   
-function mostrarAba(aba) {
-  document.getElementById('aba-ranking').classList.toggle(
-    'hidden', aba !== 'ranking'
-  );
 
-  document.getElementById('aba-trabalhos').classList.toggle(
-    'hidden', aba !== 'trabalhos'
-  );
+function mostrarAba(aba) {
+  const ranking = document.getElementById('aba-ranking');
+  const trabalhos = document.getElementById('aba-trabalhos');
+
+  ranking.style.display = aba === 'ranking' ? '' : 'none';
+  trabalhos.style.display = aba === 'trabalhos' ? '' : 'none';
+
+  ranking.classList.toggle('hidden', aba !== 'ranking');
+  trabalhos.classList.toggle('hidden', aba !== 'trabalhos');
 }
+
 
 // 1) Substitua pelos dados do seu projeto Firebase (Configurações do projeto > Seus apps > Aplicativo da Web).
 const firebaseConfig = {
