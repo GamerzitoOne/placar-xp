@@ -121,204 +121,86 @@ h2 {
   }
 }
 
-
-/* Abas de navegação */
-.tab-nav {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 18px;
-}
-
-.tab-btn {
-  border: 1px solid rgba(255,255,255,.35);
-  border-radius: 10px;
-  padding: 11px 16px;
-  background: rgba(255,255,255,.92);
-  color: var(--ink);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.tab-btn[aria-selected="true"] {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
-}
-
-.tab-page[hidden] {
-  display: none !important;
-}
-
-.work-intro {
-  margin-bottom: 16px;
-  color: var(--muted);
-}
-
-.work-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.work-card {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,.55);
-  border-radius: 16px;
-  padding: 14px;
-  box-shadow: 0 6px 24px rgba(0,0,0,.12);
-}
-
-.work-card h3 {
-  margin-top: 0;
-}
-
-.work-image {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-}
-
-.work-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 12px;
-}
-
-@media (max-width: 780px) {
-  .work-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 </style>
 </head>
 <body>
-<header><div class="wrap"><h1>🏆 XP da Turma</h1><p>Ranking público e perfis individuais dos estudantes</p></div></header>
+
+<header>
+  <div class="wrap">
+    <h1>🏆 XP da Turma</h1>
+    <p>Ranking público e perfis individuais dos estudantes</p>
+
+    <nav style="margin-top:15px; display:flex; gap:8px; flex-wrap:wrap">
+      <button type="button" onclick="mostrarAba('ranking')">
+        Ranking
+      </button>
+      <button type="button" onclick="mostrarAba('trabalhos')">
+        Trabalhos
+      </button>
+    </nav>
+  </div>
+</header>
+
 <main>
   
-<nav class="tab-nav" role="tablist" aria-label="Seções do site">
-  <button
-    class="tab-btn"
-    id="tab-ranking"
-    type="button"
-    role="tab"
-    aria-selected="true"
-    aria-controls="page-ranking">
-    🏆 Ranking XP
-  </button>
+  <section id="aba-trabalhos" class="panel hidden">
+    <h2>Trabalhos</h2>
 
-  <button
-    class="tab-btn"
-    id="tab-trabalhos"
-    type="button"
-    role="tab"
-    aria-selected="false"
-    aria-controls="page-trabalhos">
-    📚 Trabalhos
-  </button>
-</nav>
+    <h3>Mito e cosmologia</h3>
+    <p>Material de aula: definição de mito, cosmologia e atividade.</p>
 
-<section class="tab-page" id="page-ranking" role="tabpanel">
+    <div style="display:grid; gap:20px">
+      <img
+        src="imagens/material-mito-cosmologia-1.png"
+        alt="Material de aula sobre mito e cosmologia, primeira página"
+        style="width:100%; height:auto"
+      >
 
-  <section class="panel" style="margin-bottom:16px">
-    <div class="authbar">
-      <strong id="authTitle">Modo visitante — somente leitura</strong>
-      <span class="status" id="authStatus">Conectando ao banco de dados…</span>
-      <span style="flex:1"></span>
-      <button id="showLogin">Entrar como administrador</button>
-      <button id="logout" class="hidden">Sair</button>
+      <img
+        src="imagens/material-mito-cosmologia-2.png"
+        alt="Atividade sobre mito e cosmologia, segunda página"
+        style="width:100%; height:auto"
+      >
     </div>
-    <form id="loginForm" class="loginbox hidden">
-      <input id="email" type="email" placeholder="E-mail do administrador" autocomplete="username" required>
-      <input id="password" type="password" placeholder="Senha" autocomplete="current-password" required>
-      <button class="primary" type="submit">Entrar</button>
-      <button type="button" id="cancelLogin">Cancelar</button>
-      <div id="loginError" class="error"></div>
-    </form>
   </section>
-  <section class="stats">
-    <div class="stat"><span>Estudantes</span><strong id="totalAlunos">0</strong></div>
-    <div class="stat"><span>XP distribuído</span><strong id="xpTotal"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">0</strong></div>
-    <div class="stat"><span>Líder atual</span><strong id="lider" style="font-size:17px">—</strong></div>
-  </section>
-  <div class="layout">
-    <section class="panel">
-      <h2>🏅 Classificação</h2>
-      <div class="tools">
-        <input id="busca" type="search" placeholder="Buscar estudante...">
-        <select id="ordem" aria-label="Ordenar classificação">
-          <option value="xp">Maior XP</option><option value="nome">Nome A–Z</option>
-        </select>
+  <div id="aba-ranking">
+    <section class="panel" style="margin-bottom:16px">
+      <div class="authbar">
+        <strong id="authTitle">Modo visitante — somente leitura</strong>
+        <span class="status" id="authStatus">Conectando ao banco de dados…</span>
+        <span style="flex:1"></span>
+        <button id="showLogin">Entrar como administrador</button>
+        <button id="logout" class="hidden">Sair</button>
       </div>
-      <div class="table-wrap"><table><thead><tr><th>#</th><th>Estudante</th><th class="xp"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">XP</th><th>Perfil</th></tr></thead><tbody id="corpo"></tbody></table></div>
-      <p class="note">Todos podem consultar o ranking. Somente a conta de administrador autenticada pode alterar XP e anotações.</p>
+      <form id="loginForm" class="loginbox hidden">
+        <input id="email" type="email" placeholder="E-mail do administrador" autocomplete="username" required>
+        <input id="password" type="password" placeholder="Senha" autocomplete="current-password" required>
+        <button class="primary" type="submit">Entrar</button>
+        <button type="button" id="cancelLogin">Cancelar</button>
+        <div id="loginError" class="error"></div>
+      </form>
     </section>
-    <aside class="panel" id="perfil"><h2>👤 Perfil individual</h2><p class="profile-empty">Selecione um estudante na classificação para abrir o perfil.</p></aside>
-  </div>
-  <p class="note">O ranking é compartilhado entre visitantes por meio do Firebase Firestore. Configure as credenciais e as regras de segurança antes de publicar.</p>
-  
-</section>
-
-<section
-  class="tab-page"
-  id="page-trabalhos"
-  role="tabpanel"
-  aria-labelledby="tab-trabalhos"
-  hidden>
-
-  <section class="panel">
-    <h2>📚 Trabalhos da turma</h2>
-
-    <p class="work-intro">
-      Materiais de aula e atividades para estudo.
-    </p>
-
-    <div class="work-grid">
-
-      <article class="work-card">
-        <h3>Mito, ciência e cosmologia — Parte 1</h3>
-
-        <img
-          class="work-image"
-          src="trabalho-mito-cosmologia-1.png"
-          alt="Material sobre mito, ciência e cosmologia">
-
-        <div class="work-actions">
-          <a href="trabalho-mito-cosmologia-1.png" target="_blank" rel="noopener">
-            Abrir material
-          </a>
-          <a href="trabalho-mito-cosmologia-1.png" download>
-            Baixar
-          </a>
+    <section class="stats">
+      <div class="stat"><span>Estudantes</span><strong id="totalAlunos">0</strong></div>
+      <div class="stat"><span>XP distribuído</span><strong id="xpTotal"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">0</strong></div>
+      <div class="stat"><span>Líder atual</span><strong id="lider" style="font-size:17px">—</strong></div>
+    </section>
+    <div class="layout">
+      <section class="panel">
+        <h2>🏅 Classificação</h2>
+        <div class="tools">
+          <input id="busca" type="search" placeholder="Buscar estudante...">
+          <select id="ordem" aria-label="Ordenar classificação">
+            <option value="xp">Maior XP</option><option value="nome">Nome A–Z</option>
+          </select>
         </div>
-      </article>
-
-      <article class="work-card">
-        <h3>Mito, ciência e cosmologia — Parte 2</h3>
-
-        <img
-          class="work-image"
-          src="trabalho-mito-cosmologia-2.png"
-          alt="Atividade sobre mito, ciência e cosmologia">
-
-        <div class="work-actions">
-          <a href="trabalho-mito-cosmologia-2.png" target="_blank" rel="noopener">
-            Abrir material
-          </a>
-          <a href="trabalho-mito-cosmologia-2.png" download>
-            Baixar
-          </a>
-        </div>
-      </article>
-
+        <div class="table-wrap"><table><thead><tr><th>#</th><th>Estudante</th><th class="xp"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">XP</th><th>Perfil</th></tr></thead><tbody id="corpo"></tbody></table></div>
+        <p class="note">Todos podem consultar o ranking. Somente a conta de administrador autenticada pode alterar XP e anotações.</p>
+      </section>
+      <aside class="panel" id="perfil"><h2>👤 Perfil individual</h2><p class="profile-empty">Selecione um estudante na classificação para abrir o perfil.</p></aside>
     </div>
-  </section>
-</section>
-
+    <p class="note">O ranking é compartilhado entre visitantes por meio do Firebase Firestore. Configure as credenciais e as regras de segurança antes de publicar.</p>
+  </div>
 </main>
 
 <!-- Firebase SDK compat -->
@@ -327,36 +209,15 @@ h2 {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
   
-const tabRanking = document.getElementById('tab-ranking');
-const tabTrabalhos = document.getElementById('tab-trabalhos');
-
-const pageRanking = document.getElementById('page-ranking');
-const pageTrabalhos = document.getElementById('page-trabalhos');
-
-function selecionarAba(aba) {
-  const mostrarRanking = aba === 'ranking';
-
-  tabRanking.setAttribute(
-    'aria-selected',
-    String(mostrarRanking)
+function mostrarAba(aba) {
+  document.getElementById('aba-ranking').classList.toggle(
+    'hidden', aba !== 'ranking'
   );
 
-  tabTrabalhos.setAttribute(
-    'aria-selected',
-    String(!mostrarRanking)
+  document.getElementById('aba-trabalhos').classList.toggle(
+    'hidden', aba !== 'trabalhos'
   );
-
-  pageRanking.hidden = !mostrarRanking;
-  pageTrabalhos.hidden = mostrarRanking;
 }
-
-tabRanking.addEventListener('click', () => {
-  selecionarAba('ranking');
-});
-
-tabTrabalhos.addEventListener('click', () => {
-  selecionarAba('trabalhos');
-});
 
 // 1) Substitua pelos dados do seu projeto Firebase (Configurações do projeto > Seus apps > Aplicativo da Web).
 const firebaseConfig = {
