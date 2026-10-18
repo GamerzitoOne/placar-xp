@@ -137,9 +137,6 @@ h2 {
       <button type="button" onclick="mostrarAba('trabalhos')">
         Trabalhos
       </button>
-      <button type="button" onclick="mostrarAba('piano')">
-        🎹 Piano
-      </button>
     </nav>
   </div>
 </header>
@@ -188,90 +185,6 @@ h2 {
     style="display:block; width:100%; height:auto;"
   >
 </section>
-
-<section id="aba-piano" class="panel hidden">
-  <h2>🎹 Mini Piano</h2>
-  <p>Clique nas teclas ou use o teclado do computador.</p>
-
-  <p id="nota-piano">Nota: —</p>
-
-  <div id="mini-piano" style="
-    display:flex;
-    position:relative;
-    width:100%;
-    max-width:560px;
-    height:180px;
-    margin:20px auto;
-    user-select:none;
-  ">
-    <button data-note="C4" data-freq="261.63" data-key="a" class="piano-white">A</button>
-    <button data-note="D4" data-freq="293.66" data-key="s" class="piano-white">S</button>
-    <button data-note="E4" data-freq="329.63" data-key="d" class="piano-white">D</button>
-    <button data-note="F4" data-freq="349.23" data-key="f" class="piano-white">F</button>
-    <button data-note="G4" data-freq="392.00" data-key="g" class="piano-white">G</button>
-    <button data-note="A4" data-freq="440.00" data-key="h" class="piano-white">H</button>
-    <button data-note="B4" data-freq="493.88" data-key="j" class="piano-white">J</button>
-    <button data-note="C5" data-freq="523.25" data-key="k" class="piano-white">K</button>
-
-    <button data-note="C#4" data-freq="277.18" data-key="w" class="piano-black" style="left:8.5%">W</button>
-    <button data-note="D#4" data-freq="311.13" data-key="e" class="piano-black" style="left:21%">E</button>
-    <button data-note="F#4" data-freq="369.99" data-key="t" class="piano-black" style="left:46%">T</button>
-    <button data-note="G#4" data-freq="415.30" data-key="y" class="piano-black" style="left:58.5%">Y</button>
-    <button data-note="A#4" data-freq="466.16" data-key="u" class="piano-black" style="left:71%">U</button>
-  </div>
-
-  <p style="text-align:center;font-size:12px">
-    Teclas brancas: A S D F G H J K · Teclas pretas: W E T Y U
-  </p>
-</section>
-
-<style>
-  #mini-piano .piano-white {
-    flex:1;
-    min-width:0;
-    height:180px;
-    padding:0;
-    border:1px solid #222;
-    border-radius:0 0 6px 6px;
-    background:#fff;
-    color:#222;
-    display:flex;
-    align-items:flex-end;
-    justify-content:center;
-    padding-bottom:10px;
-    font: bold 12px system-ui,sans-serif;
-  }
-
-  #mini-piano .piano-white:active,
-  #mini-piano .piano-white.playing {
-    background:#cfe0ff;
-  }
-
-  #mini-piano .piano-black {
-    position:absolute;
-    z-index:2;
-    top:0;
-    width:8%;
-    height:110px;
-    padding:0;
-    border:1px solid #000;
-    border-radius:0 0 5px 5px;
-    background:#202020;
-    color:white;
-    font: bold 10px system-ui,sans-serif;
-  }
-
-  #mini-piano .piano-black:active,
-  #mini-piano .piano-black.playing {
-    background:#4059a8;
-  }
-
-  @media(max-width:500px) {
-    #mini-piano { height:145px !important; }
-    #mini-piano .piano-white { height:145px; }
-    #mini-piano .piano-black { height:90px; }
-  }
-</style>
 
 
   <div id="aba-ranking">
@@ -322,16 +235,16 @@ h2 {
   
 
 
-
 function mostrarAba(aba) {
-  const abas = ['ranking', 'trabalhos', 'piano'];
+  const ranking = document.getElementById('aba-ranking');
+  const trabalhos = document.getElementById('aba-trabalhos');
 
-  abas.forEach(nome => {
-    const elemento = document.getElementById('aba-' + nome);
-    elemento.classList.toggle('hidden', nome !== aba);
-  });
+  ranking.style.display = aba === 'ranking' ? '' : 'none';
+  trabalhos.style.display = aba === 'trabalhos' ? '' : 'none';
+
+  ranking.classList.toggle('hidden', aba !== 'ranking');
+  trabalhos.classList.toggle('hidden', aba !== 'trabalhos');
 }
-
 
 
 
@@ -492,64 +405,6 @@ $('loginForm').addEventListener('submit',async e=>{
 $('logout').onclick=()=>auth?.signOut();
 $('busca').addEventListener('input',render);$('ordem').addEventListener('change',render);
 iniciarFirebase();
-
-let contextoPiano;
-
-function tocarNota(botao) {
-  const frequencia = Number(botao.dataset.freq);
-
-  if (!contextoPiano) {
-    contextoPiano = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
-  if (contextoPiano.state === 'suspended') {
-    contextoPiano.resume();
-  }
-
-  const oscilador = contextoPiano.createOscillator();
-  const volume = contextoPiano.createGain();
-  const agora = contextoPiano.currentTime;
-
-  oscilador.type = 'triangle';
-  oscilador.frequency.value = frequencia;
-
-  volume.gain.setValueAtTime(0.0001, agora);
-  volume.gain.exponentialRampToValueAtTime(0.25, agora + 0.02);
-  volume.gain.exponentialRampToValueAtTime(0.0001, agora + 0.8);
-
-  oscilador.connect(volume);
-  volume.connect(contextoPiano.destination);
-
-  oscilador.start(agora);
-  oscilador.stop(agora + 0.82);
-
-  document.getElementById('nota-piano').textContent =
-    'Nota: ' + botao.dataset.note;
-
-  botao.classList.add('playing');
-  setTimeout(() => botao.classList.remove('playing'), 150);
-}
-
-document.querySelectorAll('#mini-piano button').forEach(botao => {
-  botao.addEventListener('click', () => tocarNota(botao));
-});
-
-document.addEventListener('keydown', evento => {
-  if (evento.repeat || evento.ctrlKey || evento.altKey || evento.metaKey) return;
-
-  const elemento = evento.target;
-  if (elemento.matches('input, textarea, select')) return;
-
-  if (document.getElementById('aba-piano').classList.contains('hidden')) return;
-
-  const tecla = evento.key.toLowerCase();
-  const botao = document.querySelector(
-    '#mini-piano button[data-key="' + tecla + '"]'
-  );
-
-  if (botao) tocarNota(botao);
-});
-
 </script>
 </body>
 </html>
