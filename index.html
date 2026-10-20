@@ -209,6 +209,18 @@ h2 {
       <div class="stat"><span>XP distribuído</span><strong id="xpTotal"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">0</strong></div>
       <div class="stat"><span>Líder atual</span><strong id="lider" style="font-size:17px">—</strong></div>
     </section>
+
+    <section class="panel tag-admin hidden" id="painelTags">
+      <h2>🏷️ Administrar tags</h2>
+      <p class="note" style="margin-top:0">Crie etiquetas para classificar os estudantes. Depois, abra o perfil de um aluno para atribuir ou retirar as tags.</p>
+      <form id="formTag" class="tools">
+        <input id="nomeTag" type="text" maxlength="32" placeholder="Nome da tag (ex.: Destaque)" required>
+        <input id="corTag" class="tag-color" type="color" value="#375dfb" aria-label="Cor da tag">
+        <button class="primary" type="submit">Criar tag</button>
+      </form>
+      <div id="listaTagsAdmin"><p class="status">Nenhuma tag criada ainda.</p></div>
+      <p id="erroTags" class="error"></p>
+    </section>
     <div class="layout">
       <section class="panel">
         <h2>🏅 Classificação</h2>
@@ -219,7 +231,7 @@ h2 {
           </select>
         </div>
         <div class="table-wrap"><table><thead><tr><th>#</th><th>Estudante</th><th class="xp"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="Estrela">XP</th><th>Perfil</th></tr></thead><tbody id="corpo"></tbody></table></div>
-        <p class="note">Todos podem consultar o ranking. Somente a conta de administrador autenticada pode alterar XP e anotações.</p>
+        <p class="note">Todos podem consultar o ranking e as tags dos perfis. Somente o administrador autenticado pode alterar XP, anotações e tags.</p>
       </section>
       <aside class="panel" id="perfil"><h2>👤 Perfil individual</h2><p class="profile-empty">Selecione um estudante na classificação para abrir o perfil.</p></aside>
     </div>
@@ -277,6 +289,7 @@ const $ = id => document.getElementById(id);
 const fmt = n => Number(n||0).toLocaleString('pt-BR');
 const escapar = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let auth=null, db=null, usuario=null, dados=[], selecionado=null, unsubscribe=null, inicializado=false;
+let tagsDisponiveis=[], unsubscribeTags=null;
 
 function mostrarStatus(msg){$('authStatus').textContent=msg;}
 function ehConfigExemplo(){
@@ -343,6 +356,86 @@ async function carregarDados(){
    console.error(e);
  }
 }
+function observarTags(){
+  if(!db)return;
+  if(unsubscribeTags)unsubscribeTags();
+  unsubscribeTags=db.collection('tags').orderBy('name').onSnapshot(snap=>{
+    tagsDisponiveis=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderTagsAdmin();
+    if(selecionado)renderPerfil();
+  },err=>{
+    $('erroTags').textContent='Não foi possível carregar as tags. Confira as regras da coleção "tags" no Firestore.';
+    console.error(err);
+  });
+}
+function corTexto(hex){
+  const h=String(hex||'#375dfb').replace('#','');
+  if(!/^[0-9a-fA-F]{6}$/.test(h))return '#ffffff';
+  const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  return (0.299*r+0.587*g+0.114*b)>155?'#172033':'#ffffff';
+}
+function tagChip(tag){
+  const cor=tag.color||'#375dfb';
+  return `<span class="tag-chip" style="background:${escapar(cor)};color:${corTexto(cor)}">${escapar(tag.name||'Tag')}</span>`;
+}
+function renderTagsAdmin(){
+  const area=$('listaTagsAdmin');
+  if(!area)return;
+  if(!usuario){area.innerHTML='';return;}
+  if(!tagsDisponiveis.length){
+    area.innerHTML='<p class="status">Nenhuma tag criada ainda.</p>';
+    return;
+  }
+  area.innerHTML=tagsDisponiveis.map(t=>`
+    <div class="tag-row">
+      ${tagChip(t)}
+      <span style="flex:1"></span>
+      <button type="button" class="small danger" data-delete-tag="${escapar(t.id)}">Excluir</button>
+    </div>`).join('');
+  area.querySelectorAll('[data-delete-tag]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const tag=tagsDisponiveis.find(t=>t.id===btn.dataset.deleteTag);
+      if(!tag)return;
+      if(!confirm('Excluir a tag "'+tag.name+'"? Ela também será retirada dos perfis dos alunos.'))return;
+      try{
+        const batch=db.batch();
+        dados.forEach(a=>{
+          if((a.tags||[]).includes(tag.id)){
+            batch.set(db.collection('students').doc(a.id),{
+              tags:firebase.firestore.FieldValue.arrayRemove(tag.id),
+              updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+            },{merge:true});
+          }
+        });
+        batch.delete(db.collection('tags').doc(tag.id));
+        await batch.commit();
+      }catch(e){alert('Não foi possível excluir a tag. Confira as regras do Firestore.\\n'+e.message);}
+    });
+  });
+}
+$('formTag').addEventListener('submit',async e=>{
+  e.preventDefault();
+  $('erroTags').textContent='';
+  if(!usuario||!db){$('erroTags').textContent='Entre como administrador para criar tags.';return;}
+  const name=$('nomeTag').value.trim();
+  const color=$('corTag').value;
+  if(!name)return;
+  if(tagsDisponiveis.some(t=>String(t.name||'').toLocaleLowerCase('pt-BR')===name.toLocaleLowerCase('pt-BR'))){
+    $('erroTags').textContent='Já existe uma tag com esse nome.';
+    return;
+  }
+  try{
+    await db.collection('tags').add({
+      name, color,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    });
+    $('nomeTag').value='';
+  }catch(err){
+    $('erroTags').textContent='Não foi possível criar a tag. Confira as regras da coleção "tags" no Firestore.';
+    console.error(err);
+  }
+});
+
 function ranking(){
  const termo=$('busca').value.trim().toLocaleLowerCase('pt-BR');
  const arr=dados.filter(a=>a.name.toLocaleLowerCase('pt-BR').includes(termo));
