@@ -355,7 +355,7 @@ function observarTags(){
  if(unsubscribeTags)unsubscribeTags();
  unsubscribeTags=db.collection('tags').orderBy('name').onSnapshot(snap=>{
   tagsDisponiveis=snap.docs.map(d=>({id:d.id,...d.data()}));
-  if(selecionado)renderPerfil();
+  render();
  },err=>console.error('Erro ao carregar tags:',err));
 }
 function corTexto(hex){
@@ -401,7 +401,13 @@ function render(){
  $('lider').textContent=ordenados[0]?.xp>0?ordenados[0].name.split(' ')[0]:'—';
  $('corpo').innerHTML=ranking().map(a=>{
    const pos=ordenados.findIndex(x=>x.name===a.name)+1;
-   return `<tr><td><span class="rank">${pos}</span></td><td><button class="namebtn" data-open="${escapar(a.name)}">${escapar(a.name)}</button></td><td class="xp"><span class="xpval"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="">${fmt(a.xp)} XP</span></td><td><button class="small" data-open="${escapar(a.name)}">Abrir</button></td></tr>`;
+   // Se o aluno tiver mais de uma tag, a primeira tag atribuída define a cor do nome.
+   const tagNome=(a.tags||[]).map(id=>tagsDisponiveis.find(t=>t.id===id)).find(Boolean);
+   const estiloNome=tagNome
+     ? `background:${escapar(tagNome.color||'#375dfb')};color:${corTexto(tagNome.color||'#375dfb')};padding:5px 8px;border-radius:6px;display:inline-block;`
+     : '';
+   const tituloTags=(a.tags||[]).map(id=>tagsDisponiveis.find(t=>t.id===id)).filter(Boolean).map(t=>t.name).join(', ');
+   return `<tr><td><span class="rank">${pos}</span></td><td><button class="namebtn" style="${estiloNome}" title="${escapar(tituloTags)}" data-open="${escapar(a.name)}">${escapar(a.name)}</button></td><td class="xp"><span class="xpval"><img class="xp-icon" src="https://slackmojis.com/emojis/1972-star/download" alt="">${fmt(a.xp)} XP</span></td><td><button class="small" data-open="${escapar(a.name)}">Abrir</button></td></tr>`;
  }).join('')||'<tr><td colspan="4">Nenhum estudante encontrado.</td></tr>';
  $('corpo').querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>abrir(b.dataset.open)));
  if(selecionado)renderPerfil();
